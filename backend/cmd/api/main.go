@@ -1,21 +1,31 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"time"
-    
+
 	"github.com/Popie52/devboard/backend/internal/handler"
-	"github.com/Popie52/devboard/backend/internal/middleware"	
+	"github.com/Popie52/devboard/backend/internal/middleware"
+	"github.com/Popie52/devboard/backend/internal/service"
 )
 
 func main() {
-	fmt.Println("Welcome to DevBoard!")
 
-	mux := handler.RegisterRoutes()
+	// service
+	noteService := service.NewNoteService()
 
+	// handler
+	noteHandler := handler.NewNoteHandler(noteService)
+
+	// router
+	mux := http.NewServeMux()
+
+	// routes
+	handler.RegisterRoutes(mux, noteHandler)
+
+	// middleware chain
 	h := middleware.Logger(mux)
 	h = middleware.CORSHANDLER(h)
 
@@ -29,8 +39,7 @@ func main() {
 	log.Println("Server running on :8080")
 
 	if err := server.ListenAndServe(); err != nil {
-		log.Println("Failed to start backend:", err)
+		log.Println("Server failed:", err)
 		os.Exit(1)
 	}
 }
-

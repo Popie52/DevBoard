@@ -13,8 +13,10 @@ func Logger(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 
-		duration := time.Since(start)
-
-		log.Printf("%s %s %v", r.Method, r.URL.Path, duration)
+		log.Printf("%s %s %s",
+			r.Method,
+			r.URL.Path,
+			time.Since(start),
+		)
 	})
 }

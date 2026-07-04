@@ -1,40 +1,24 @@
 package handler
 
-import (
-	"encoding/json"
-	"fmt"
-	"html"
-	"net/http"
-)
+import "net/http"
 
+func RegisterRoutes(mux *http.ServeMux, h *NoteHandler) {
 
-type HealthResponse struct {
-	Status  string `json:"status"`
-	Service string `json:"service"`
-	Version string `json:"version"`
-}
-
-func HealthHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	resp := HealthResponse{
-		Status:  "ok",
-		Service: "devboard-backend",
-		Version: "0.1.0",
-	}
-
-	json.NewEncoder(w).Encode(resp)
-}
-
-func RegisterRoutes() *http.ServeMux {
-	mux := http.NewServeMux()
-
+	// health
 	mux.HandleFunc("/health", HealthHandler)
-	mux.HandleFunc("/bar", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+
+	// notes collection
+	mux.HandleFunc("/notes", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			h.GetNotes(w, r)
+		case http.MethodPost:
+			h.CreateNote(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
 	})
 
-	return mux
+	// notes item
+	mux.HandleFunc("/notes/", h.DeleteNote)
 }
-
-
