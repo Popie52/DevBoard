@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"os"
 	"time"
-        "github.com/Popie52/devboard/backend/internal/handler"
+    
+	"github.com/Popie52/devboard/backend/internal/handler"
+	"github.com/Popie52/devboard/backend/internal/middleware"	
 )
 
 func main() {
@@ -14,9 +16,12 @@ func main() {
 
 	mux := handler.RegisterRoutes()
 
+	h := middleware.Logger(mux)
+	h = middleware.CORSHANDLER(h)
+
 	server := &http.Server{
 		Addr:         ":8080",
-		Handler:      mux,
+		Handler:      h,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
