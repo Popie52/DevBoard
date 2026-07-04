@@ -1,12 +1,8 @@
 "use client";
 
+import { getHealth } from "@/lib/api";
 import { useEffect, useState } from "react";
-
-type HealthResponse = {
-  status: string;
-  service: string;
-  version: string;
-};
+import { HealthResponse } from "@/types/health";
 
 export default function Home() {
   const [data, setData] = useState<HealthResponse | null>(null);
@@ -14,11 +10,8 @@ export default function Home() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/health`
-        );
-        const json = await res.json();
-        setData(json);
+        const data = await getHealth()
+        setData(data);
       } catch (e) {
         console.error(e);
       }
